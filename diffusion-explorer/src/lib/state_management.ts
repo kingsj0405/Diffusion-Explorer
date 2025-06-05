@@ -29,7 +29,8 @@ import {
     cachedModelPaths,
     isTraining,
     sampler,
-    allTimeGridSamples
+    allTimeGridSamples,
+    maxEpochs
 } from '$lib/state';
 
 // Helper functions
@@ -125,11 +126,11 @@ export async function handleDatasetChange() {
         // If there is no model, switch pretrained to false
         usePretrained.set(false);
     }
-    // Check if the sampler is valid for $trainingObjective and if not set it to a valid default
+    // Check if the sampler is valid for trainingObjective and if not set it to a valid default
     // NOTE: This is done here to avoid conflicting with the training objective
     if (!settings.trainingObjectiveToSamplers[trainingObjectiveVal].includes(samplerVal)) {
         // Set the sampler to the first one in the list
-        sampler.set(settings.trainingObjectiveToSamplers[$trainingObjective][0]);
+        sampler.set(settings.trainingObjectiveToSamplers[trainingObjectiveVal][0]);
     }
     // Load the dataset
     const pointsData = datasetDictVal[datasetNameVal];
@@ -334,12 +335,20 @@ export function startTraining() {
     // Pull out the appropriate model config 
     const trainingObjectiveVal = get(trainingObjective);
     const modelConfig = settings.trainingObjectiveToModelConfig[trainingObjectiveVal];
+    
+    // Create dynamic training config using maxEpochs from state
+    const dynamicTrainingConfig = {
+        epochs: get(maxEpochs),
+        batchSize: settings.trainingConfig.batchSize,
+        updateInterval: settings.trainingConfig.updateInterval,
+    };
+    
     // Call the training worker thread
     const trainingWorker: Worker = callTrainingWorkerThread(
         trainingObjectiveVal,
         modelConfig,
         jsonURL ? jsonURL : base + datasetNameToPath[datasetNameVal],
-        settings.trainingConfig,
+        dynamicTrainingConfig,
         (tfModelPath: string) => {
             finishTraining(
                 tfModelPath, 

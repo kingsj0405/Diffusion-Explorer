@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
     import { base } from '$app/paths';
     import { derived } from 'svelte/store';
     // Import components
@@ -10,7 +10,8 @@
     import { 
         trainingObjective, 
         sampler, 
-        epochValue, 
+        epochValue,
+        maxEpochs,
         isTraining,
         activePlotTypes,
         usePretrained,
@@ -25,7 +26,7 @@
         "Path": `${base}/StyleIcons/PathIcon.svg`
     };
 
-    function padEpochValue(value) {
+    function padEpochValue(value: number) {
         // Take the epoch value and convert it to a 5 digit number, with leading zeros and a comma
         const paddedValue = String(value).padStart(5, '0');
         return paddedValue.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
@@ -126,6 +127,35 @@
         margin: 0;
         /* margin-top: 14px; */
         /* margin-bottom: 12px; */
+    }
+
+    .epoch-display {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .epoch-input {
+        width: 80px;
+        height: 24px;
+        font-family: var(--font-family);
+        font-size: 12px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 2px 4px;
+        background-color: white;
+    }
+
+    .epoch-input:disabled {
+        background-color: #f5f5f5;
+        color: #999;
+        cursor: not-allowed;
+    }
+
+    .epoch-counter-value {
+        font-size: 12px;
     }
 
     :global(.style-menu-button) {
@@ -316,7 +346,20 @@
             <div class="menu epoch-counter">
                 <h1 class="label">Epoch</h1>
                 <div class="menu-contents">
-                    <p class="epoch-counter-value">{padEpochValue($epochValue)}</p>
+                    <div class="epoch-display">
+                        <p class="epoch-counter-value">{padEpochValue($epochValue)} / 
+                            <input 
+                                type="number" 
+                                class="epoch-input" 
+                                bind:value={$maxEpochs} 
+                                disabled={$isTraining}
+                                min="1"
+                                max="100000"
+                                step="1"
+                                placeholder="Max epochs"
+                            />
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>

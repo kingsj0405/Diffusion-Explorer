@@ -62,6 +62,7 @@ self.onmessage = async (e) => {
             () => { return trainingStopped; },
             (epoch, intermediateSamples) => {
                 // Send the intermediate samples to the main thread
+                console.log(epoch, intermediateSamples);
                 self.postMessage({ 
                     type: 'epoch_chunk', 
                     epoch: epoch, 

@@ -9,4 +9,12 @@ export default defineConfig({
 			'@mswjs/interceptors'
 		]
 	},
+	server: {
+		port: 8943,
+		host: true,
+		allowedHosts: [
+			's33.ciplab.kr',
+			'78a0-165-132-140-84.ngrok-free.app',
+		]
+	}
 });

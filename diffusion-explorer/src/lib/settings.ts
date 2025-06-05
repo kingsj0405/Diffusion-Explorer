@@ -19,7 +19,11 @@ export const trainingObjectiveToDisplayOptions: Record<string, DisplayOptions> =
         "Plot Types": ["Contour", "Scatter", "Mesh"],
         "Default Plot Types": ["Contour", "Scatter"],
     }, 
-    "Diffusion": {
+    "Diffusion (ε-prediction)": {
+        "Plot Types": ["Contour", "Scatter"],
+        "Default Plot Types": ["Contour", "Scatter"],
+    },
+    "Diffusion (v-prediction)": {
         "Plot Types": ["Contour", "Scatter"],
         "Default Plot Types": ["Contour", "Scatter"],
     },
@@ -32,14 +36,19 @@ export interface HyperparameterMenuEntry {
 
 export const trainingObjectives: string[] = [
     "Flow Matching",
-    // "Diffusion"
+    "Diffusion (ε-prediction)", 
+    "Diffusion (v-prediction)"
 ];
 
 export const trainingObjectiveToSamplers: Record<string, string[]> = {
     "Flow Matching": [
         "Euler",
     ],
-    "Diffusion": [
+    "Diffusion (ε-prediction)": [
+        "DDPM",
+        // "DDIM" // TODO: Implement DDIM
+    ],
+    "Diffusion (v-prediction)": [
         "DDPM",
         // "DDIM" // TODO: Implement DDIM
     ]
@@ -51,8 +60,11 @@ export const pretrainedModelPaths: Record<string, Record<string, string>> = {
         // "Concentric Circles": "/models/flow_matching_concentric_circles/model.json",
         "Smiley Face": "/models/flow_matching_smiley_face/model.json",
     },
-    "Diffusion": {
-        "Smiley Face": "/models/diffusion_smiley_face/model.json",
+    "Diffusion (ε-prediction)": {
+        // "Smiley Face": "/models/diffusion_smiley_face/model.json",
+    },
+    "Diffusion (v-prediction)": {
+        // "Smiley Face": "/models/diffusion_v_smiley_face/model.json",
     }
 };
 
@@ -70,9 +82,23 @@ export const cachedGridSamplesPaths: Record<string, Record<string, string>> = {
     },
 }
 
+// Create separate classes for epsilon and v-prediction
+export class DiffusionEpsilonModel extends DiffusionModel {
+    constructor(dim = 2, hidden = 128, T = 1000, betaStart = 1e-4, betaEnd = 2e-2) {
+        super(dim, hidden, T, betaStart, betaEnd, 'epsilon');
+    }
+}
+
+export class DiffusionVModel extends DiffusionModel {
+    constructor(dim = 2, hidden = 128, T = 1000, betaStart = 1e-4, betaEnd = 2e-2) {
+        super(dim, hidden, T, betaStart, betaEnd, 'v');
+    }
+}
+
 export const trainingObjectiveToModelClass: Record<string, any> = {
     "Flow Matching": FlowModel,
-    "Diffusion": DiffusionModel
+    "Diffusion (ε-prediction)": DiffusionEpsilonModel,
+    "Diffusion (v-prediction)": DiffusionVModel
 };
 
 export interface ModelConfig {
@@ -85,7 +111,11 @@ export const trainingObjectiveToModelConfig: Record<string, ModelConfig> = {
         dim: 2,
         hidden: 64,
     },
-    "Diffusion": {
+    "Diffusion (ε-prediction)": {
+        dim: 2,
+        hidden: 64,
+    },
+    "Diffusion (v-prediction)": {
         dim: 2,
         hidden: 64,
     }
@@ -133,6 +163,8 @@ export const interfaceSettings: {
     mainAreaHeight: 640,
     displayAreaWidth: 1300,
     displayAreaHeight: 500,
+    pointColor: "rgba(255, 100, 0, 1)",
+    scatterPlotOpacity: 0.4,
 };
 
 export const domainRange: {
@@ -160,6 +192,8 @@ export const contourPlotSettings: {
 } = {
     opacity: 0.4,
     showBorder: false,
+    fillColor: "#7b7b7b",
+    borderColor: "#7b7b7b",
     borderWidth: 1,
     bandwidth: 30,
     contourLevels: 4,
